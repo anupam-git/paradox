@@ -1,0 +1,27 @@
+{
+  "name": "paradox",
+  "version": "0.1.0",
+  "description": "Remote Script Runner",
+  "main": "index.js",
+  "dependencies": {
+    "ts-loader": "^5.1.0"
+  },
+  "devDependencies": {
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.0.3"
+  },
+  "scripts": {
+    "build": "npm run tslint && npm run build-ts",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "build-ts": "tsc",
+    "build-executable": "",
+    "watch-ts": "tsc -w"
+  },
+  "keywords": [
+    "jamp"
+  ],
+  "author": "Anupam Basak",
+  "license": "ISC"
+}
