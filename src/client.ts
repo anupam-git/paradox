@@ -1,0 +1,1 @@
+console.log(`RUN SCRIPT ${process.argv[4]} ON ${process.argv[2]}:${process.argv[3]}`);
