@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import * as AppDirectory from "appdirectory";
+import * as Bcrypt from "bcrypt";
 import * as Commander from "commander";
 import { existsSync, mkdirpSync, readFileSync, writeJSONSync } from "fs-extra";
 import { isIP } from "net";
@@ -21,17 +22,21 @@ export class Paradox {
   private static instance: Paradox;
 
   private commander: Commander.Command;
+  private hashingSaltRounds = 10;
   private appName = "paradox";
   private appVersion = "0.1.0";
   private appDirs: any;
   private configFilename = "config.json";
   private config: IConfig;
-  private defaultConfig = {
+  private defaultConfig: IConfig = {
+    users: {},
     scripts: {}
   };
 
   private constructor() {
     this.startServerActionHandler = this.startServerActionHandler.bind(this);
+    this.addUserActionHandler = this.addUserActionHandler.bind(this);
+    this.removeUserActionHandler = this.removeUserActionHandler.bind(this);
     this.listScriptsActionHandler = this.listScriptsActionHandler.bind(this);
     this.runScriptActionHandler = this.runScriptActionHandler.bind(this);
     this.addScriptActionHandler = this.addScriptActionHandler.bind(this);
@@ -78,15 +83,14 @@ export class Paradox {
       .action(this.startServerActionHandler);
 
     this.commander
-      .command("list-scripts <host> <port>")
-      .description("Show List of Available Remote Scripts")
-      .action(this.listScriptsActionHandler);
+      .command("add-user <username> <password>")
+      .description("Add User to Paradox Server")
+      .action(this.addUserActionHandler);
 
     this.commander
-      .command("run-script <host> <port> <script-name>")
-      .option("-w, --wait-for-response")
-      .description("Run Script on Remote Paradox Server")
-      .action(this.runScriptActionHandler);
+      .command("remove-user <username>")
+      .description("Remove User from Paradox Server")
+      .action(this.removeUserActionHandler);
 
     this.commander
       .command("add-script <name> <script>")
@@ -97,6 +101,19 @@ export class Paradox {
       .command("remove-script <name>")
       .description("Removes a Registered Script from Paradox Server [Requires Restart]")
       .action(this.removeScriptActionHandler);
+
+    this.commander
+      .command("list-scripts <host> <port>")
+      .description("Show List of Available Remote Scripts")
+      .action(this.listScriptsActionHandler);
+
+    this.commander
+      .command("run-script <host> <port> <script-name>")
+      .option("-w, --wait-for-output", "[Optional] Waits for output of Script")
+      .option("-u, --username <username>", "[Required]")
+      .option("-p, --password <password>", "[Required]")
+      .description("Run Script on Remote Paradox Server")
+      .action(this.runScriptActionHandler);
 
     this.commander
       .command("reset-config")
@@ -131,6 +148,21 @@ export class Paradox {
     }
   }
 
+  private addUserActionHandler(username: string, password: string) {
+    this.config.users[username] = password;
+    this.writeConfig(this.config, "User Added");
+  }
+
+  private removeUserActionHandler(username: string) {
+    if (this.config.users[username]) {
+      delete this.config.users[username];
+
+      this.writeConfig(this.config, "User Deleted");
+    } else {
+      console.error(`User '${name}' not found`);
+    }
+  }
+
   private listScriptsActionHandler(host: string, port: number) {
     this.checkHost(host);
     this.checkPort(port);
@@ -142,7 +174,13 @@ export class Paradox {
     this.checkHost(host);
     this.checkPort(port);
 
-    new Client(host, port).runScript(script, options.waitForResponse || false);
+    if (!options.username || !options.password) {
+      this.printInvalidCommand(["--username and --password arguments are required for run-script command"]);
+    }
+
+    Bcrypt.hash(options.password, this.hashingSaltRounds, (err: Error, hash: string) => {
+      new Client(host, port).runScript(script, options.username, hash, options.waitForOutput || false);
+    });
   }
 
   private addScriptActionHandler(name: string, script: string) {

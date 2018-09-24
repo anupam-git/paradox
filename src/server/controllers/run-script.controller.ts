@@ -1,6 +1,7 @@
+import * as Bcrypt from "bcrypt";
+import { exec, ExecException } from "child_process";
 import { NextFunction, Request, Response, Router } from "express";
 
-import { exec, ExecException } from "child_process";
 import { IConfig } from "../../_shared/IConfig";
 import { IController } from "../../_shared/IController";
 
@@ -23,22 +24,31 @@ export class RunScriptController implements IController {
 
   private rootPostHandler(req: Request, res: Response, next: NextFunction) {
     if (this.config.scripts[req.params.script]) {
-      exec(this.config.scripts[req.params.script], (err: ExecException, stdout: string, stderr: string) => {
-        if (req.query.waitForResponse) {
+      Bcrypt.compare(this.config.users[req.query.username], req.query.password, (cryptErr: Error, isMatch: boolean) => {
+        if (this.config.users[req.query.username] && isMatch) {
+          exec(this.config.scripts[req.params.script], (err: ExecException, stdout: string, stderr: string) => {
+            if (req.query.waitForOutput) {
+              res.json({
+                status: "success",
+                err,
+                stdout,
+                stderr
+              });
+            }
+          });
+
+          if (!req.query.waitForOutput) {
+            res.json({
+              status: "success"
+            });
+          }
+        } else {
           res.json({
-            status: "success",
-            err,
-            stdout,
-            stderr
+            status: "error",
+            message: "Invalid Username and/or Password"
           });
         }
       });
-
-      if (!req.query.waitForResponse) {
-        res.json({
-          status: "success"
-        });
-      }
     } else {
       res.json({
         status: "error",

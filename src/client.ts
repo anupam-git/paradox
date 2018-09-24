@@ -21,16 +21,19 @@ export class Client {
       });
   }
 
-  public runScript(script: string, waitForResponse: boolean) {
+  public runScript(script: string, username: string, password: string, waitForOutput: boolean) {
     HttpRequest
-      .post(`http://${this.host}:${this.port}/runScript/${script}?waitForResponse=${waitForResponse}`, (err, res, body) => {
+      .post(`http://${this.host}:${this.port}/runScript/${script}?waitForOutput=${waitForOutput}&username=${username}&password=${password}`, (err, res, body) => {
         try {
           const parsedResponse = JSON.parse(body);
+          console.log(parsedResponse, parsedResponse.status === "error", parsedResponse.message);
 
-          if (waitForResponse) {
-            console.log(parsedResponse.stdout);
-          } else if (parsedResponse.status === "success") {
-            console.log("Script Executation Started Successfully");
+          if (parsedResponse.status === "success") {
+            if (waitForOutput) {
+              console.log(parsedResponse.stdout);
+            } else {
+              console.log("Script Executation Started Successfully");
+            }
           } else if (parsedResponse.status === "error") {
             console.log(parsedResponse.message || "Error");
           } else {
