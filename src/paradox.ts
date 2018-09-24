@@ -1,5 +1,7 @@
 import * as Commander from "commander";
 import { isIP } from "net";
+import { Client } from "./client";
+import { Server } from "./server/server";
 
 export class Paradox {
   public static getInstance() {
@@ -57,14 +59,14 @@ export class Paradox {
     this.checkHost(host);
     this.checkPort(port);
 
-    console.log("Start Server Action Handler :", host, port);
+    new Server(host, port).start();
   }
 
   private runScriptActionHandler(host: string, port: number, script: string) {
     this.checkHost(host);
     this.checkPort(port);
 
-    console.log("Run Script Action Handler :", host, port, script);
+    new Client(host, port).runScript(script);
   }
 }
 
