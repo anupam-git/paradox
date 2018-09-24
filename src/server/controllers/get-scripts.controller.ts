@@ -1,19 +1,17 @@
 import { NextFunction, Request, Response, Router } from "express";
 
-export class GetScriptsController {
-  public static getInstance() {
-    if (this.instance === undefined) {
-      this.instance = new GetScriptsController();
-    }
+import { IConfig } from "../../_shared/IConfig";
+import { IController } from "../../_shared/IController";
 
-    return this.instance;
-  }
-  private static instance: GetScriptsController;
-
+export class GetScriptsController implements IController {
+  private config: IConfig;
   private router: Router;
 
-  private constructor() {
+  public constructor(config: IConfig) {
+    this.config = config;
     this.router = Router();
+
+    this.rootGetHandler = this.rootGetHandler.bind(this);
 
     this.router.get("/", this.rootGetHandler);
   }
@@ -23,11 +21,6 @@ export class GetScriptsController {
   }
 
   private rootGetHandler(req: Request, res: Response, next: NextFunction) {
-    res.json([
-      "1",
-      "2",
-      "3",
-      "Boom!!!"
-    ]);
+    res.json(Object.keys(this.config.scripts));
   }
 }

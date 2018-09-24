@@ -9,15 +9,40 @@ export class Client {
     this.port = port;
   }
 
-  public runScript(script: string) {
+  public getScripts() {
     HttpRequest
-      .post(`http://${this.host}:${this.port}/runScript/${script}`, (err, res, body) => {
+      .get(`http://${this.host}:${this.port}/getScripts`, (err, res, body) => {
         try {
           const parsedResponse = JSON.parse(body);
           console.log(parsedResponse);
         } catch (e) {
-          console.error(`Invalid Response. Check if Paradox Server is Running on ${this.host}:${this.port}`);
+          this.printInvalidResponse();
         }
       });
+  }
+
+  public runScript(script: string, waitForResponse: boolean) {
+    HttpRequest
+      .post(`http://${this.host}:${this.port}/runScript/${script}?waitForResponse=${waitForResponse}`, (err, res, body) => {
+        try {
+          const parsedResponse = JSON.parse(body);
+
+          if (waitForResponse) {
+            console.log(parsedResponse.stdout);
+          } else if (parsedResponse.status === "success") {
+            console.log("Script Executation Started Successfully");
+          } else if (parsedResponse.status === "error") {
+            console.log(parsedResponse.message || "Error");
+          } else {
+            console.log("Oops. This shouldn't come up.");
+          }
+        } catch (e) {
+          this.printInvalidResponse();
+        }
+      });
+  }
+
+  private printInvalidResponse() {
+    console.error(`INVALID RESPONSE: Check if Paradox Server is Running on ${this.host}:${this.port}`);
   }
 }

@@ -2,17 +2,20 @@ import { json } from "body-parser";
 import * as Express from "express";
 import * as Morgan from "morgan";
 
+import { IConfig } from "../_shared/IConfig";
 import { GetScriptsController } from "./controllers/get-scripts.controller";
 import { RunScriptController } from "./controllers/run-script.controller";
 
 export class Server {
   private host: string;
   private port: number;
+  private config: IConfig;
   private expressApp: Express.Application;
 
-  public constructor(host: string, port: number) {
+  public constructor(host: string, port: number, config: IConfig) {
     this.host = host;
     this.port = port;
+    this.config = config;
 
     this.expressApp = Express();
     this.setupExpressApp();
@@ -37,7 +40,7 @@ export class Server {
   }
 
   private registerControllers() {
-    this.expressApp.use("/getScripts", GetScriptsController.getInstance().getRouter());
-    this.expressApp.use("/runScript", RunScriptController.getInstance().getRouter());
+    this.expressApp.use("/getScripts", new GetScriptsController(this.config).getRouter());
+    this.expressApp.use("/runScript", new RunScriptController(this.config).getRouter());
   }
 }

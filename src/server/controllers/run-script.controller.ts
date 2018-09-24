@@ -1,19 +1,18 @@
 import { NextFunction, Request, Response, Router } from "express";
 
-export class RunScriptController {
-  public static getInstance() {
-    if (this.instance === undefined) {
-      this.instance = new RunScriptController();
-    }
+import { exec, ExecException } from "child_process";
+import { IConfig } from "../../_shared/IConfig";
+import { IController } from "../../_shared/IController";
 
-    return this.instance;
-  }
-  private static instance: RunScriptController;
-
+export class RunScriptController implements IController {
+  private config: IConfig;
   private router: Router;
 
-  private constructor() {
+  public constructor(config: IConfig) {
+    this.config = config;
     this.router = Router();
+
+    this.rootPostHandler = this.rootPostHandler.bind(this);
 
     this.router.post("/:script", this.rootPostHandler);
   }
@@ -23,9 +22,28 @@ export class RunScriptController {
   }
 
   private rootPostHandler(req: Request, res: Response, next: NextFunction) {
-    console.log(req.params.script);
-    res.json({
-      status: "success"
-    });
+    if (this.config.scripts[req.params.script]) {
+      exec(this.config.scripts[req.params.script], (err: ExecException, stdout: string, stderr: string) => {
+        if (req.query.waitForResponse) {
+          res.json({
+            status: "success",
+            err,
+            stdout,
+            stderr
+          });
+        }
+      });
+
+      if (!req.query.waitForResponse) {
+        res.json({
+          status: "success"
+        });
+      }
+    } else {
+      res.json({
+        status: "error",
+        message: "Invalid Script"
+      });
+    }
   }
 }
