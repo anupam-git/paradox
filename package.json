@@ -31,7 +31,9 @@
     "watch-ts": "tsc -w"
   },
   "keywords": [
-    "jamp"
+    "remote script",
+    "remote",
+    "shell script"
   ],
   "author": "Anupam Basak",
   "license": "ISC"
