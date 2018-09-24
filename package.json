@@ -23,10 +23,11 @@
     "typescript": "^3.0.3"
   },
   "scripts": {
-    "build": "npm run tslint && npm run build-ts",
+    "clean": "rm -rf ./build",
+    "build": "npm run tslint && npm run build-ts && npm run build-executables",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "build-ts": "tsc",
-    "build-executable": "",
+    "build-executables": "pkg -t latest-linux-x86,latest-linux-x64,latest-win-x86,latest-win-x64,latest-macos-x86,latest-macos-x64 build/paradox.js --output build/binaries/paradox",
     "watch-ts": "tsc -w"
   },
   "keywords": [
