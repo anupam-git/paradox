@@ -149,7 +149,7 @@ export class Paradox {
   }
 
   private addUserActionHandler(username: string, password: string) {
-    this.config.users[username] = password;
+    this.config.users[username] = new Buffer(password).toString("base64");
     this.writeConfig(this.config, "User Added");
   }
 

@@ -24,7 +24,9 @@ export class RunScriptController implements IController {
 
   private rootPostHandler(req: Request, res: Response, next: NextFunction) {
     if (this.config.scripts[req.params.script]) {
-      Bcrypt.compare(this.config.users[req.query.username], req.query.password, (cryptErr: Error, isMatch: boolean) => {
+      const password = new Buffer(this.config.users[req.query.username], "base64").toString("ascii");
+
+      Bcrypt.compare(password, req.query.password, (cryptErr: Error, isMatch: boolean) => {
         if (this.config.users[req.query.username] && isMatch) {
           exec(this.config.scripts[req.params.script], (err: ExecException, stdout: string, stderr: string) => {
             if (req.query.waitForOutput) {

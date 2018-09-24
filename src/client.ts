@@ -26,7 +26,6 @@ export class Client {
       .post(`http://${this.host}:${this.port}/runScript/${script}?waitForOutput=${waitForOutput}&username=${username}&password=${password}`, (err, res, body) => {
         try {
           const parsedResponse = JSON.parse(body);
-          console.log(parsedResponse, parsedResponse.status === "error", parsedResponse.message);
 
           if (parsedResponse.status === "success") {
             if (waitForOutput) {
