@@ -5,16 +5,19 @@ import * as Morgan from "morgan";
 import { IConfig } from "../_shared/IConfig";
 import { GetScriptsController } from "./controllers/get-scripts.controller";
 import { RunScriptController } from "./controllers/run-script.controller";
+import { VersionController } from "./controllers/version-controller";
 
 export class Server {
   private host: string;
   private port: number;
+  private version: string;
   private config: IConfig;
   private expressApp: Express.Application;
 
-  public constructor(host: string, port: number, config: IConfig) {
+  public constructor(host: string, port: number, version: string, config: IConfig) {
     this.host = host;
     this.port = port;
+    this.version = version;
     this.config = config;
 
     this.expressApp = Express();
@@ -40,6 +43,7 @@ export class Server {
   }
 
   private registerControllers() {
+    this.expressApp.use("/version", new VersionController(this.version).getRouter());
     this.expressApp.use("/getScripts", new GetScriptsController(this.config).getRouter());
     this.expressApp.use("/runScript", new RunScriptController(this.config).getRouter());
   }

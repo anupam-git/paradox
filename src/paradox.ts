@@ -7,6 +7,7 @@ import { existsSync, mkdirpSync, readFileSync, writeJSONSync } from "fs-extra";
 import { isIP } from "net";
 import * as Path from "path";
 
+import { version } from "punycode";
 import { IConfig } from "./_shared/IConfig";
 import { Client } from "./client";
 import { Server } from "./server/server";
@@ -142,7 +143,7 @@ export class Paradox {
     try {
       this.validateConfig(this.config);
 
-      new Server(host, port, this.config).start();
+      new Server(host, port, this.appVersion, this.config).start();
     } catch (e) {
       this.printError("Make sure config file is valid and readable.");
     }
