@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as Commander from "commander";
 import { isIP } from "net";
 import { Client } from "./client";
@@ -14,27 +16,17 @@ export class Paradox {
   private static instance: Paradox;
 
   private commander: Commander.Command;
+  private version: string;
 
   private constructor(version: string) {
+    this.version = version;
+
     this.startServerActionHandler = this.startServerActionHandler.bind(this);
     this.runScriptActionHandler = this.runScriptActionHandler.bind(this);
 
-    this.commander = Commander
-      .name("paradox")
-      .version(version, "-v, --version");
-
-    this.commander
-      .command("start-server <host> <port>")
-      .description("Start Paradox Server")
-      .action(this.startServerActionHandler);
-
-    this.commander
-      .command("run-script <host> <port> <script-name>")
-      .description("Run Script on Remote Paradox Server")
-      .action(this.runScriptActionHandler);
-
-    this.commander
-      .parse(process.argv);
+    this.commander = Commander.name("paradox");
+    this.setupCommands();
+    this.parseCommands();
   }
 
   public getParser() {
@@ -55,6 +47,39 @@ export class Paradox {
     }
   }
 
+  private setupCommands() {
+    this.commander
+      .version(this.version, "-v, --version");
+
+    this.commander
+      .command("start-server <host> <port>")
+      .description("Start Paradox Server")
+      .action(this.startServerActionHandler);
+
+    this.commander
+      .command("list-scripts <host> <port>")
+      .description("Show List of Available Scripts")
+      .action(this.startServerActionHandler);
+
+    this.commander
+      .command("run-script <host> <port> <script-name>")
+      .description("Run Script on Remote Paradox Server")
+      .action(this.runScriptActionHandler);
+
+    this.commander
+      .on("command:*", () => {
+        this.printInvalid(this.commander.args);
+      });
+  }
+
+  private parseCommands() {
+    if (process.argv.length === 2) {
+      this.printInvalid([]);
+    }
+
+    this.commander.parse(process.argv);
+  }
+
   private startServerActionHandler(host: string, port: number) {
     this.checkHost(host);
     this.checkPort(port);
@@ -67,6 +92,11 @@ export class Paradox {
     this.checkPort(port);
 
     new Client(host, port).runScript(script);
+  }
+
+  private printInvalid(args: string[]) {
+    console.error("Invalid command: %s\nSee --help for a list of available commands.", args.join(" "));
+    process.exit(1);
   }
 }
 
