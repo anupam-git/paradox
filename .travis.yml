@@ -4,6 +4,9 @@ node_js: "node"
 before_install:
   - npm i -g pkg
 
+script:
+  - npm run build
+
 after_success:
   - ls -lh build/binaries/
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
