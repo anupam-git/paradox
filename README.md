@@ -33,6 +33,11 @@ If you want to receive the output of the scriptm then invoke the `run-scrupt` co
 ./paradox run-script -u <username> -p <password> <host> <port> <script-name>
 ```
 
+# Want To Treat Me? :)
+If you want to show some love, you can Treat Me via Paypal. :)
+
+[![Treats Me via PayPal](https://cdn.rawgit.com/twolfson/paypal-github-button/1.0.0/dist/button.svg)](https://paypal.me/AnupamBasak)
+
 # Documentation
 ```
 Usage: paradox [options] [command]
