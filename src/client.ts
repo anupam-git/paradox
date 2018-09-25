@@ -25,11 +25,11 @@ export class Client {
 
   public runScript(script: string, username: string, password: string, waitForOutput: boolean) {
     HttpRequest
-      .get(`http://${this.host}:${this.port}/version`, (err, res, body) => {
+      .get(`http://${this.host}:${this.port}/version`, (versionErr, versionRes, versionBody) => {
         try {
-          const parsedResponse = JSON.parse(body);
+          const versionParsedResponse = JSON.parse(versionBody);
 
-          if (this.version === parsedResponse.version) {
+          if (this.version === versionParsedResponse.version) {
             HttpRequest
               .post(`http://${this.host}:${this.port}/runScript/${script}?waitForOutput=${waitForOutput}&username=${username}&password=${password}`, (err, res, body) => {
                 try {

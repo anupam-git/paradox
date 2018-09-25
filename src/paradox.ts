@@ -7,7 +7,6 @@ import { existsSync, mkdirpSync, readFileSync, writeJSONSync } from "fs-extra";
 import { isIP } from "net";
 import * as Path from "path";
 
-import { version } from "punycode";
 import { IConfig } from "./_shared/IConfig";
 import { Client } from "./client";
 import { Server } from "./server/server";
@@ -168,7 +167,7 @@ export class Paradox {
     this.checkHost(host);
     this.checkPort(port);
 
-    new Client(host, port).getScripts();
+    new Client(host, port, this.appVersion).getScripts();
   }
 
   private runScriptActionHandler(host: string, port: number, script: string, options: any) {
@@ -180,7 +179,7 @@ export class Paradox {
     }
 
     Bcrypt.hash(options.password, this.hashingSaltRounds, (err: Error, hash: string) => {
-      new Client(host, port).runScript(script, options.username, hash, options.waitForOutput || false);
+      new Client(host, port, this.appVersion).runScript(script, options.username, hash, options.waitForOutput || false);
     });
   }
 
