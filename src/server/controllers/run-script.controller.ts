@@ -1,4 +1,4 @@
-import * as Bcrypt from "bcrypt";
+import * as Bcrypt from "bcryptjs";
 import { exec, ExecException } from "child_process";
 import { NextFunction, Request, Response, Router } from "express";
 

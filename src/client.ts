@@ -12,51 +12,68 @@ export class Client {
   }
 
   public getScripts() {
-    HttpRequest
-      .get(`http://${this.host}:${this.port}/getScripts`, (err, res, body) => {
-        try {
-          const parsedResponse = JSON.parse(body);
-          console.log(parsedResponse);
-        } catch (e) {
-          this.printInvalidResponse();
-        }
+    this.checkVersionMismatch()
+      .then(() => {
+        HttpRequest
+          .get(`http://${this.host}:${this.port}/getScripts`, (err, res, body) => {
+            try {
+              const parsedResponse = JSON.parse(body);
+              console.log(parsedResponse);
+            } catch (e) {
+              this.printInvalidResponse();
+            }
+          });
+      })
+      .catch(() => {
+        this.printError("Version Mismatch. Please make sure Server and Client are having same version of Paradox CLI tool");
       });
   }
 
   public runScript(script: string, username: string, password: string, waitForOutput: boolean) {
-    HttpRequest
-      .get(`http://${this.host}:${this.port}/version`, (versionErr, versionRes, versionBody) => {
-        try {
-          const versionParsedResponse = JSON.parse(versionBody);
+    this.checkVersionMismatch()
+      .then(() => {
+        HttpRequest
+          .post(`http://${this.host}:${this.port}/runScript/${script}?waitForOutput=${waitForOutput}&username=${username}&password=${password}`, (err, res, body) => {
+            try {
+              const runScriptParsedResponse = JSON.parse(body);
 
-          if (this.version === versionParsedResponse.version) {
-            HttpRequest
-              .post(`http://${this.host}:${this.port}/runScript/${script}?waitForOutput=${waitForOutput}&username=${username}&password=${password}`, (err, res, body) => {
-                try {
-                  const runScriptParsedResponse = JSON.parse(body);
-
-                  if (runScriptParsedResponse.status === "success") {
-                    if (waitForOutput) {
-                      console.log(runScriptParsedResponse.stdout);
-                    } else {
-                      console.log("Script Executation Started Successfully");
-                    }
-                  } else if (runScriptParsedResponse.status === "error") {
-                    console.log(runScriptParsedResponse.message || "Error");
-                  } else {
-                    console.log("Oops. This shouldn't come up.");
-                  }
-                } catch (e) {
-                  this.printInvalidResponse();
+              if (runScriptParsedResponse.status === "success") {
+                if (waitForOutput) {
+                  console.log(runScriptParsedResponse.stdout);
+                } else {
+                  console.log("Script Executation Started Successfully");
                 }
-              });
-          } else {
-            this.printError("Version Mismatch. Please make sure Server and Client are having same version of Paradox CLI tool");
-          }
-        } catch (e) {
-          this.printInvalidResponse();
-        }
+              } else if (runScriptParsedResponse.status === "error") {
+                console.log(runScriptParsedResponse.message || "Error");
+              } else {
+                console.log("Oops. This shouldn't come up.");
+              }
+            } catch (e) {
+              this.printInvalidResponse();
+            }
+          });
+      })
+      .catch(() => {
+        this.printError("Version Mismatch. Please make sure Server and Client are having same version of Paradox CLI tool");
       });
+  }
+
+  private checkVersionMismatch(): Promise<void> {
+    const version = this.version;
+    const promise = new Promise<void>((resolve, reject) => {
+      HttpRequest
+        .get(`http://${this.host}:${this.port}/version`, (versionErr, versionRes, versionBody) => {
+          try {
+            const versionParsedResponse = JSON.parse(versionBody);
+
+            version === versionParsedResponse.version ? resolve() : reject();
+          } catch (e) {
+            this.printInvalidResponse();
+          }
+        });
+    });
+
+    return promise;
   }
 
   private printInvalidResponse() {

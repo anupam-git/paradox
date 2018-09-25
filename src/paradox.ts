@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as AppDirectory from "appdirectory";
-import * as Bcrypt from "bcrypt";
+import * as Bcrypt from "bcryptjs";
 import * as Commander from "commander";
 import { existsSync, mkdirpSync, readFileSync, writeJSONSync } from "fs-extra";
 import { isIP } from "net";

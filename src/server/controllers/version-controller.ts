@@ -7,6 +7,7 @@ export class VersionController implements IController {
 
   public constructor(version: string) {
     this.router = Router();
+    this.version = version;
 
     this.rootGetHandler = this.rootGetHandler.bind(this);
 
