@@ -1,9 +1,9 @@
 # Paradox
 A neat tool to run scripts on a Server from Remote Clients.
-Paradox is written in NodeJS and shipped as executables for Linux, [unfortunately ;)] Windows and MacOS.
+Paradox is written in NodeJS and shipped as standalone executables for Linux, [unfortunately ;)] Windows and MacOS.
 
 ### Install
-No need to run from source code unless you absolutely want to.
+No need to build from source code unless you absolutely want to.
 Grab the latest version from the [GitHub Releases](https://github.com/anupam-git/paradox/releases).
 
 ### How it works
